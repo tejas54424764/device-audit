@@ -12,7 +12,7 @@
 [CmdletBinding()]
 param(
     [string] $OutputFile,
-    [switch] $IncludeSoftware,
+    [switch] $NoSoftware,
     [switch] $Quiet
 )
 
@@ -24,9 +24,14 @@ $ScriptName = 'DeviceAudit.ps1'
 
 if (-not $OutputFile) {
     $cleanUser = ($env:USERNAME -replace '[ /\\:]', '-')
-    $cleanComp = ($env:COMPUTERNAME -replace '[ /\\:]', '-')
     $dateStamp = Get-Date -Format 'yyyyMMdd'
-    $OutputFile = Join-Path (Get-Location) ("device-audit-{0}-{1}-{2}.md" -f $cleanUser, $cleanComp, $dateStamp)
+    $fname = "device-audit-{0}-{1}.md" -f $cleanUser, $dateStamp
+    $desktop = [Environment]::GetFolderPath('Desktop')
+    if ($desktop -and (Test-Path $desktop)) {
+        $OutputFile = Join-Path $desktop $fname
+    } else {
+        $OutputFile = Join-Path (Get-Location) $fname
+    }
 }
 
 $sb = New-Object System.Text.StringBuilder
@@ -245,7 +250,7 @@ Add-KV 'Pending reboot' (Val (Try-Get { (Test-Path 'HKLM:\SOFTWARE\Microsoft\Win
 Add-KV 'PowerShell version' $PSVersionTable.PSVersion.ToString()
 Add-KV 'Installed on' (Val (Try-Get { (Get-CimInstance Win32_OperatingSystem).InstallDate }))
 
-if ($IncludeSoftware) {
+if (-not $NoSoftware) {
     Add-Line ''
     Add-Line '### Installed applications'
     Add-Line ''
@@ -287,9 +292,10 @@ try {
         Write-Host ""
         Write-Host "============================================================" -ForegroundColor Green
         Write-Host "  Device audit completed successfully!" -ForegroundColor Green
-        Write-Host "  Markdown report written to:"
+        Write-Host "  Markdown report saved to:"
         Write-Host "  $fullPath" -ForegroundColor Cyan
         Write-Host "============================================================" -ForegroundColor Green
+        try { Start-Process explorer.exe -ArgumentList "/select,`"$fullPath`"" } catch {}
     }
     exit 0
 } catch {

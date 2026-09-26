@@ -23,11 +23,11 @@ Linux, macOS and Windows results can be compared side by side.
 Anything that cannot be read is reported as `_n/a_` instead of being omitted, so
 every report has the same shape.
 
-## Quick Run for Employees (No Install / One-liner)
+## Quick Run for Employees (One-Liner)
 
-Employees can generate and save their Markdown report by pasting a single command into their terminal. Nothing needs to be cloned or installed beforehand.
+Employees just paste a single command into their terminal to generate their complete device audit report. Nothing needs to be installed, and no repo cloning is required.
 
-### macOS / Linux
+### macOS & Linux
 
 Open **Terminal** and run:
 
@@ -35,29 +35,20 @@ Open **Terminal** and run:
 curl -fsSL https://raw.githubusercontent.com/tejas54424764/device-audit/main/device-audit.sh | bash
 ```
 
-- Automatically generates and saves `device-audit-<user>-<hostname>-<date>.md` in the current directory and prints the full path.
-- To include full list of installed applications:
-  ```bash
-  curl -fsSL https://raw.githubusercontent.com/tejas54424764/device-audit/main/device-audit.sh | bash -s -- -s
-  ```
-- To redirect output to a specific file:
-  ```bash
-  curl -fsSL https://raw.githubusercontent.com/tejas54424764/device-audit/main/device-audit.sh | bash > my-report.md
-  ```
+- **Output:** Saves `device-audit-<user>-<date>.md` directly onto their **Desktop** (or `$PWD` if on a headless server).
+- **Auto-Reveal:** On macOS, Finder automatically opens and highlights the `.md` file so they can immediately drag and drop it into Slack or Email.
+- **Includes:** Full hardware, OS, disk, network, security, and installed software details.
 
 ### Windows
 
-Open **PowerShell** (Run as Administrator recommended) and run:
+Open **PowerShell** and run:
 
 ```powershell
 irm https://raw.githubusercontent.com/tejas54424764/device-audit/main/DeviceAudit.ps1 | iex
 ```
 
-- Generates and saves `device-audit-<user>-<computer>-<date>.md` in the current folder.
-- Or download and run directly with custom parameters:
-  ```powershell
-  curl.exe -fsSL https://raw.githubusercontent.com/tejas54424764/device-audit/main/DeviceAudit.ps1 -o DeviceAudit.ps1; .\DeviceAudit.ps1 -IncludeSoftware
-  ```
+- **Output:** Saves `device-audit-<user>-<date>.md` directly onto their **Desktop**.
+- **Auto-Reveal:** File Explorer automatically opens with the report highlighted.
 
 ---
 

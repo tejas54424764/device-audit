@@ -13,7 +13,7 @@ PROG="${0##*/}"
 [ -n "$PROG" ] || PROG="device-audit.sh"
 
 OUTFILE=""
-INCLUDE_SOFTWARE=0
+INCLUDE_SOFTWARE=1
 QUIET=0
 NA="_n/a_"
 CMD_TIMEOUT="${DEVICE_AUDIT_TIMEOUT:-3}"
@@ -23,8 +23,7 @@ usage() {
 $PROG $VERSION - collect device information into a Markdown report
 
 Options:
-  -o FILE   write report to FILE (use '-' for stdout; default: device-audit-<user>-<host>-<date>.md)
-  -s        include the list of installed software/packages (can be long)
+  -o FILE   write report to FILE (use '-' for stdout; default: Desktop or PWD)
   -q        quiet: only print the output path (no banners)
   -h        show this help
 
@@ -51,13 +50,18 @@ elif [ -z "$OUTFILE" ] && [ ! -t 1 ]; then
 fi
 
 if [ "$TO_STDOUT" = "0" ] && [ -z "$OUTFILE" ]; then
-  USER_NAME="$(id -un 2>/dev/null || echo "user")"
+  USER_NAME="$(id -un 2>/dev/null || whoami 2>/dev/null || echo "user")"
   CLEAN_HOST="$(hostname -s 2>/dev/null || hostname 2>/dev/null || echo "host")"
   CLEAN_HOST="${CLEAN_HOST%.local}"
   CLEAN_HOST="$(printf '%s' "$CLEAN_HOST" | tr ' /\\:' '----')"
   USER_NAME="$(printf '%s' "$USER_NAME" | tr ' /\\:' '----')"
   DATE_STAMP="$(date +%Y%m%d)"
-  OUTFILE="device-audit-${USER_NAME}-${CLEAN_HOST}-${DATE_STAMP}.md"
+  FNAME="device-audit-${USER_NAME}-${DATE_STAMP}.md"
+  if [ -d "$HOME/Desktop" ] && [ -w "$HOME/Desktop" ]; then
+    OUTFILE="$HOME/Desktop/$FNAME"
+  else
+    OUTFILE="$PWD/$FNAME"
+  fi
 fi
 
 have() { command -v "$1" >/dev/null 2>&1; }
@@ -468,9 +472,12 @@ else
     printf '\n'
     printf '============================================================\n'
     printf '  Device audit completed successfully!\n'
-    printf '  Markdown report written to:\n'
+    printf '  Markdown report saved to:\n'
     printf '  %s\n' "$FULL_PATH"
     printf '============================================================\n'
+    if [ "$IS_MAC" = "1" ] && [ -t 1 ]; then
+      open -R "$FULL_PATH" 2>/dev/null &
+    fi
   fi
 fi
 exit 0
