@@ -74,8 +74,10 @@ function Is-Admin {
 # ----------------------------------------------------------------- report start
 $os   = Try-Get { Get-CimInstance Win32_OperatingSystem }
 $cs   = Try-Get { Get-CimInstance Win32_ComputerSystem }
+$csp  = Try-Get { Get-CimInstance Win32_ComputerSystemProduct }
 $cpu  = Try-Get { Get-CimInstance Win32_Processor | Select-Object -First 1 }
 $bios = Try-Get { Get-CimInstance Win32_BIOS }
+$enc  = Try-Get { Get-CimInstance Win32_SystemEnclosure | Select-Object -First 1 }
 
 Add-Line '# Device Audit Report'
 Add-Line ''
@@ -113,17 +115,18 @@ Add-Line '| --- | --- |'
 Add-KV 'Manufacturer' $cs.Manufacturer
 Add-KV 'Model' $cs.Model
 Add-KV 'System type' $cs.SystemType
-Add-KV 'Chassis' (Try-Run { (Get-CimInstance Win32_SystemEnclosure | Select-Object -First 1).ChassisTypes })
+Add-KV 'Chassis' (Try-Run { $enc.ChassisTypes })
 Add-KV 'CPU' $cpu.Name
 Add-KV 'Cores (physical)' $cpu.NumberOfCores
 Add-KV 'Cores (logical)' $cpu.NumberOfLogicalProcessors
 Add-KV 'CPU max speed (MHz)' $cpu.MaxClockSpeed
 Add-KV 'Memory' (Try-Run { '{0:N2} GiB' -f ($cs.TotalPhysicalMemory / 1GB) })
-Add-KV 'Serial number' $bios.SerialNumber
-Add-KV 'UUID' $cs.UUID
+$serial = if ($bios.SerialNumber) { $bios.SerialNumber } else { $csp.IdentifyingNumber }
+Add-KV 'Serial number' $serial
+Add-KV 'UUID' (if ($csp.UUID) { $csp.UUID } else { $cs.UUID })
 Add-KV 'BIOS vendor' $bios.Manufacturer
 Add-KV 'BIOS version' $bios.SMBIOSBIOSVersion
-Add-KV 'Asset tag' $cs.Tag
+Add-KV 'Asset tag' (if ($enc.SMBIOSAssetTag) { $enc.SMBIOSAssetTag } else { $cs.Tag })
 Add-KV 'Secure boot' (Try-Run { if (Confirm-SecureBootUEFI) { 'enabled' } else { 'disabled' } })
 Add-KV 'Virtualization present' (Try-Run { $cs.HypervisorPresent })
 Add-KV 'Part of domain' (Try-Run { $cs.PartOfDomain })
