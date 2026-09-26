@@ -23,13 +23,51 @@ Linux, macOS and Windows results can be compared side by side.
 Anything that cannot be read is reported as `_n/a_` instead of being omitted, so
 every report has the same shape.
 
-## Usage
+## Quick Run for Employees (No Install / One-liner)
+
+Employees can generate and save their Markdown report by pasting a single command into their terminal. Nothing needs to be cloned or installed beforehand.
+
+### macOS / Linux
+
+Open **Terminal** and run:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/tejas54424764/device-audit/main/device-audit.sh | bash
+```
+
+- Automatically generates and saves `device-audit-<user>-<hostname>-<date>.md` in the current directory and prints the full path.
+- To include full list of installed applications:
+  ```bash
+  curl -fsSL https://raw.githubusercontent.com/tejas54424764/device-audit/main/device-audit.sh | bash -s -- -s
+  ```
+- To redirect output to a specific file:
+  ```bash
+  curl -fsSL https://raw.githubusercontent.com/tejas54424764/device-audit/main/device-audit.sh | bash > my-report.md
+  ```
+
+### Windows
+
+Open **PowerShell** (Run as Administrator recommended) and run:
+
+```powershell
+irm https://raw.githubusercontent.com/tejas54424764/device-audit/main/DeviceAudit.ps1 | iex
+```
+
+- Generates and saves `device-audit-<user>-<computer>-<date>.md` in the current folder.
+- Or download and run directly with custom parameters:
+  ```powershell
+  curl.exe -fsSL https://raw.githubusercontent.com/tejas54424764/device-audit/main/DeviceAudit.ps1 -o DeviceAudit.ps1; .\DeviceAudit.ps1 -IncludeSoftware
+  ```
+
+---
+
+## Local Usage (If Cloned or Downloaded)
 
 ### Linux / macOS
 
 ```bash
-./device-audit.sh                      # writes device-audit-<host>-<timestamp>.md
-./device-audit.sh -o report.md         # choose the output file
+./device-audit.sh                      # writes device-audit-<user>-<host>-<date>.md
+./device-audit.sh -o report.md         # choose the output file (use '-' for stdout)
 ./device-audit.sh -s                   # also list every installed package/app
 ./device-audit.sh -s -q -o report.md   # quiet, with the full software list
 ./device-audit.sh -h                   # help
